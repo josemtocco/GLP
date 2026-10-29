@@ -1,0 +1,21 @@
+{
+  "seed_media_id": "6120663",
+  "seed_url": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+
+  "_comentario": "canais_fixos sao resolvidos automaticamente pela media_id a cada execucao: o gerador pede um link NOVO (token renovado) de 6 em 6 horas. Edite nome/categoria a vontade. A media_id e o numero da URL do canal no Globoplay (.../ao-vivo/<media_id>/).",
+  "canais_fixos": [
+    { "media_id": "6120663",  "nome": "TV Globo",        "categoria": "TV Globo",    "logo": "" },
+    { "media_id": "11134179", "nome": "GE TV",           "categoria": "Esportes",    "logo": "" },
+    { "media_id": "7420604",  "nome": "Futura",          "categoria": "Educacao",    "logo": "" },
+    { "media_id": "12136724", "nome": "Malhacao Fast",   "categoria": "Novelas",     "logo": "" },
+    { "media_id": "12136726", "nome": "DPA Fast",        "categoria": "Infantil",    "logo": "" },
+    { "media_id": "11134191", "nome": "Receitas Fast",   "categoria": "Gastronomia", "logo": "" }
+  ],
+
+  "_comentario_adicionais": "Use APENAS se quiser colar um link /j/<token> manualmente (ele expira em 6h e voce mesmo troca). Para renovacao automatica, prefira colocar o canal em canais_fixos com a media_id.",
+  "canais_adicionais": [],
+
+  "api_affiliates": "https://api.affiliates.globo.com/v1/affiliates/info",
+  "api_playback": "https://playback.video.globo.com/v4/video-session",
+  "api_graphql": "https://jarvis.globo.com/graphql"
+}
