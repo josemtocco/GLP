@@ -1,1 +1,62 @@
+name: Atualizar playlist M3U (Globoplay)
 
+on:
+  schedule:
+    # A cada 6 horas (UTC). Ajuste se quiser outro horario.
+    - cron: '0 */6 * * *'
+  workflow_dispatch: {}      # permite rodar manualmente pelo botao "Run workflow"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-m3u
+  cancel-in-progress: false
+
+jobs:
+  gerar:
+    # IMPORTANTE: para pegar o catalogo completo e evitar o bloqueio por
+    # regiao (HTTP 403), use um self-hosted runner no Brasil.
+    # Veja GUIA-RUNNER-BRASIL.md. Enquanto nao configurar, deixe 'ubuntu-latest'
+    # (vai rodar, mas de um IP dos EUA a maioria dos canais falha por geo-bloqueio).
+    runs-on: [self-hosted, br-runner]
+    # runs-on: ubuntu-latest   # <- alternativa temporaria (IP dos EUA, limitado)
+
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Gerar playlist.m3u
+        env:
+          GLOBO_EMAIL: ${{ secrets.GLOBO_EMAIL }}
+          GLOBO_PASSWORD: ${{ secrets.GLOBO_PASSWORD }}
+          GLBID: ${{ secrets.GLBID }}
+          # INCLUDE_DRM: '0'   # descomente para excluir canais com DRM
+          # GLOBO_DEBUG: '1'   # descomente para log detalhado
+        run: |
+          python gerar_globoplay.py
+
+      - name: Commit e push das atualizacoes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add playlist.m3u estado_canais.json
+          if git diff --cached --quiet; then
+            echo "Sem mudancas para commitar."
+            exit 0
+          fi
+          git commit -m "Atualiza playlist M3U (automatico)"
+          # Reconciliar com o remoto antes do push (evita 'fetch first')
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin ${GITHUB_REF_NAME:-main} && break
+            echo "Tentativa de rebase $i falhou, repetindo..."
+            sleep 3
+          done
+          git push origin HEAD:${GITHUB_REF_NAME:-main}
